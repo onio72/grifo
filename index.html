@@ -16,9 +16,19 @@
         #canvas {
             border: 1px solid black;
             background-color: white;
+            position: relative;
         }
         .controls {
             margin-bottom: 20px;
+        }
+        .counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 16px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -30,21 +40,21 @@
 
         <br>
 
-        <label for="heightSlider">Altura del Grifo (px): </label>
-        <input type="range" id="heightSlider" min="50" max="400" value="150">
-        <span id="heightValue">150</span> px
-
-        <br>
-
         <label for="gravitySlider">Aceleración de la Gravedad (m/s²): </label>
         <input type="range" id="gravitySlider" min="1" max="20" value="9.81" step="0.01">
         <span id="gravityValue">9.81</span> m/s²
 
         <br>
 
+        <label for="showTimeCheckbox">Mostrar tiempo de caída: </label>
+        <input type="checkbox" id="showTimeCheckbox" checked>
+
+        <br>
+
         <button onclick="startSimulation()">Iniciar</button>
         <button onclick="pauseSimulation()">Pausa</button>
     </div>
+    <div class="counter" id="dropCounter">0 gotas</div>
     <canvas id="canvas" width="400" height="600"></canvas>
 
     <script>
@@ -55,20 +65,15 @@
         let animationId;
         let isPaused = false;
         let dropInterval = 1000;
-        let faucetHeight = 150;
+        const faucetHeight = 100; // Altura fija del grifo en px
         let gravity = 9.81; // Gravedad en m/s²
         const pixelsPerMeter = 100; // Factor de conversión para la simulación
         const drops = [];
+        let showTime = true;
 
         document.getElementById('intervalSlider').addEventListener('input', (e) => {
             dropInterval = e.target.value;
             document.getElementById('intervalValue').textContent = dropInterval;
-        });
-
-        document.getElementById('heightSlider').addEventListener('input', (e) => {
-            faucetHeight = e.target.value;
-            document.getElementById('heightValue').textContent = faucetHeight;
-            drawFaucet();
         });
 
         document.getElementById('gravitySlider').addEventListener('input', (e) => {
@@ -76,24 +81,23 @@
             document.getElementById('gravityValue').textContent = gravity;
         });
 
+        document.getElementById('showTimeCheckbox').addEventListener('change', (e) => {
+            showTime = e.target.checked;
+        });
+
         function drawFaucet() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.beginPath();
-            ctx.moveTo(200, faucetHeight);
-            ctx.lineTo(200, faucetHeight - 20);
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = 'black';
-            ctx.stroke();
-            drawGround();
+            const faucetImage = new Image();
+            faucetImage.src = 'https://image.shutterstock.com/image-vector/tap-faucet-icon-vector-illustration-260nw-1686684640.jpg'; // Icono del grifo
+            faucetImage.onload = () => {
+                ctx.drawImage(faucetImage, 185, faucetHeight - 50, 30, 50);
+                drawGround();
+            };
         }
 
         function drawGround() {
-            ctx.beginPath();
-            ctx.moveTo(0, canvas.height - 20);
-            ctx.lineTo(canvas.width, canvas.height - 20);
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = 'brown';
-            ctx.stroke();
+            ctx.fillStyle = 'brown';
+            ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
         }
 
         function startSimulation() {
@@ -107,6 +111,7 @@
                     time: 0,
                     velocity: 0
                 });
+                updateDropCounter();
             }, dropInterval);
             update();
         }
@@ -135,14 +140,21 @@
                     ctx.arc(drop.x, drop.y, 3, 0, Math.PI * 2);
                     ctx.fillStyle = 'blue';
                     ctx.fill();
-                    ctx.font = "12px Arial";
-                    ctx.fillStyle = "black";
-                    ctx.fillText(`${drop.time.toFixed(2)} s`, drop.x + 5, drop.y);
+                    if (showTime) {
+                        ctx.font = "12px Arial";
+                        ctx.fillStyle = "black";
+                        ctx.fillText(`${drop.time.toFixed(2)} s`, drop.x + 5, drop.y);
+                    }
                 } else {
                     drops.splice(index, 1); // Remover la gota que ha tocado el suelo
+                    updateDropCounter();
                 }
             });
             animationId = requestAnimationFrame(update);
+        }
+
+        function updateDropCounter() {
+            document.getElementById('dropCounter').textContent = `${drops.length} gotas`;
         }
 
         drawFaucet();
