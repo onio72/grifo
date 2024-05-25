@@ -57,6 +57,12 @@
 
         <br>
 
+        <label for="horizontalSlider">Posición horizontal del grifo: </label>
+        <input type="range" id="horizontalSlider" min="0" max="370" value="185" step="1">
+        <span id="horizontalValue">185</span> px
+
+        <br>
+
         <label for="showTimeCheckbox">Mostrar tiempo de caída: </label>
         <input type="checkbox" id="showTimeCheckbox" checked>
 
@@ -85,6 +91,7 @@
         const faucetImage = new Image();
         faucetImage.src = 'grifov2.png'; // Icono del grifo
         let freezeOnFirstDropFlag = false;
+        let faucetX = 185; // Posición inicial del grifo en px
 
         document.getElementById('intervalSlider').addEventListener('input', (e) => {
             dropInterval = e.target.value;
@@ -98,13 +105,19 @@
             resetSimulation();
         });
 
+        document.getElementById('horizontalSlider').addEventListener('input', (e) => {
+            faucetX = e.target.value;
+            document.getElementById('horizontalValue').textContent = faucetX;
+            resetSimulation();
+        });
+
         document.getElementById('showTimeCheckbox').addEventListener('change', (e) => {
             showTime = e.target.checked;
             resetSimulation();
         });
 
         function drawFaucet() {
-            ctx.drawImage(faucetImage, 199, faucetHeight - 50, 30, 50); // Ajustar 14 px hacia la derecha
+            ctx.drawImage(faucetImage, faucetX, faucetHeight - 50, 30, 50); // Ajustar la posición horizontal del grifo
         }
 
         function drawGround() {
@@ -119,7 +132,7 @@
             freezeOnFirstDropFlag = false;
             intervalId = setInterval(() => {
                 drops.push({
-                    x: 214, // Ajustar la posición de la gota para que salga de la boca del grifo
+                    x: parseInt(faucetX) + 15, // Ajustar la posición de la gota para que salga de la boca del grifo
                     y: faucetHeight,
                     time: 0,
                     velocity: 0
