@@ -174,7 +174,7 @@
                 drop.time += 0.016; // Incrementa el tiempo (aprox. 60 FPS)
                 drop.velocity = gravity * drop.time; // La velocidad aumenta linealmente con el tiempo
                 drop.y += drop.velocity * 0.016 * pixelsPerMeter; // La distancia recorrida aumenta cuadráticamente con el tiempo
-                if (drop.y < canvas.height - 25) { // Detener un poco antes de tocar el suelo
+                if (drop.y < canvas.height - 23) { // Detener un poco antes de tocar el suelo
                     ctx.beginPath();
                     ctx.arc(drop.x, drop.y, 3, 0, Math.PI * 2);
                     ctx.fillStyle = 'blue';
@@ -189,6 +189,7 @@
                         isPaused = true;
                         clearInterval(intervalId);
                         cancelAnimationFrame(animationId);
+                        freezeOnFirstDropFlag = false; // Reiniciar la bandera después de pausar
                     } else {
                         drops.splice(index, 1); // Remover la gota que ha tocado el suelo
                         updateDropCounter();
