@@ -16,6 +16,7 @@
         #canvas {
             border: 1px solid black;
             background-color: white;
+            position: relative;
         }
         .controls {
             margin-bottom: 20px;
@@ -31,8 +32,8 @@
         <br>
 
         <label for="gravitySlider">Aceleración de la Gravedad (m/s²): </label>
-        <input type="range" id="gravitySlider" min="1" max="20" value="9.81" step="0.01">
-        <span id="gravityValue">9.81</span> m/s²
+        <input type="range" id="gravitySlider" min="1" max="4" value="2" step="1">
+        <span id="gravityValue">2</span> m/s²
 
         <br>
 
@@ -56,7 +57,7 @@
         let isPaused = false;
         let dropInterval = 1000;
         const faucetHeight = 100; // Altura fija del grifo en px
-        let gravity = 9.81; // Gravedad en m/s²
+        let gravity = 2; // Gravedad inicial en m/s²
         const pixelsPerMeter = 100; // Factor de conversión para la simulación
         const drops = [];
         let showTime = true;
@@ -64,21 +65,24 @@
         document.getElementById('intervalSlider').addEventListener('input', (e) => {
             dropInterval = e.target.value;
             document.getElementById('intervalValue').textContent = dropInterval;
+            resetSimulation();
         });
 
         document.getElementById('gravitySlider').addEventListener('input', (e) => {
             gravity = e.target.value;
             document.getElementById('gravityValue').textContent = gravity;
+            resetSimulation();
         });
 
         document.getElementById('showTimeCheckbox').addEventListener('change', (e) => {
             showTime = e.target.checked;
+            resetSimulation();
         });
 
         function drawFaucet() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const faucetImage = new Image();
-            faucetImage.src = 'file:///mnt/data/A_simple_gray_faucet_icon_on_a_white_background._T.png'; // Icono del grifo
+            faucetImage.src = 'grifov2.png'; // Icono del grifo
             faucetImage.onload = () => {
                 ctx.drawImage(faucetImage, 185, faucetHeight - 50, 30, 50);
                 drawGround();
@@ -93,7 +97,7 @@
 
         function startSimulation() {
             clearInterval(intervalId);
-            clearInterval(animationId);
+            cancelAnimationFrame(animationId);
             isPaused = false;
             intervalId = setInterval(() => {
                 drops.push({
@@ -111,7 +115,7 @@
             isPaused = !isPaused;
             if (isPaused) {
                 clearInterval(intervalId);
-                clearInterval(animationId);
+                cancelAnimationFrame(animationId);
             } else {
                 startSimulation();
             }
@@ -119,7 +123,7 @@
 
         function resetSimulation() {
             clearInterval(intervalId);
-            clearInterval(animationId);
+            cancelAnimationFrame(animationId);
             isPaused = true;
             drops.length = 0;
             drawFaucet();
