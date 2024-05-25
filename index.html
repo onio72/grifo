@@ -21,22 +21,16 @@
         }
         .controls {
             margin-bottom: 20px;
+            text-align: center;
         }
         #introText {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             text-align: center;
             background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
+            padding: 10px;
             border-radius: 10px;
             font-size: 18px;
             width: 400px; /* Igual al ancho del canvas */
-            height: 600px; /* Igual a la altura del canvas */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -132,7 +126,7 @@
             freezeOnFirstDropFlag = false;
             intervalId = setInterval(() => {
                 drops.push({
-                    x: parseInt(faucetX) + 15, // Ajustar la posición de la gota para que salga de la boca del grifo
+                    x: parseInt(faucetX) + 5, // Ajustar la posición de la gota para que salga del extremo izquierdo del grifo
                     y: faucetHeight,
                     time: 0,
                     velocity: 0
