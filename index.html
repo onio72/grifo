@@ -28,9 +28,9 @@
             background-color: rgba(255, 255, 255, 0.9);
             padding: 10px;
             border-radius: 10px;
-            font-size: 18px;
+            font-size: 14px; /* Letra más pequeña */
             width: 400px; /* Igual al ancho del canvas */
-            margin-bottom: 20px;
+            margin-top: 20px;
         }
         h1 {
             margin: 20px 0 10px;
@@ -44,9 +44,6 @@
 <body>
     <h1>Grifo que gotea</h1>
     <h2>Animación creada por Antonio González</h2>
-    <div id="introText">
-        Ahora vas a ver una animación de un grifo que gotea. Puedes modificar el lapso de tiempo de separación entre las gotas y la aceleración de la gravedad. ¿Las gotas están uniformemente separadas?
-    </div>
     <div class="controls">
         <label for="intervalSlider">Intervalo de goteo (ms): </label>
         <input type="range" id="intervalSlider" min="100" max="2000" value="1000" step="100">
@@ -60,6 +57,12 @@
 
         <br>
 
+        <label for="timeSlider">Tiempo desde la primera gota (s): </label>
+        <input type="range" id="timeSlider" min="0" max="60" value="0" step="1">
+        <span id="timeValue">0</span> s
+
+        <br>
+
         <label for="showTimeCheckbox">Mostrar tiempo de caída: </label>
         <input type="checkbox" id="showTimeCheckbox" checked>
 
@@ -68,9 +71,11 @@
         <button onclick="startSimulation()">Iniciar</button>
         <button onclick="pauseSimulation()">Pausa</button>
         <button onclick="resetSimulation()">Reiniciar</button>
-        <button onclick="freezeOnFirstDrop()">Congelar</button>
     </div>
     <canvas id="canvas" width="400" height="600"></canvas>
+    <div id="introText">
+        Puedes modificar el lapso de tiempo de separación entre las gotas y la aceleración de la gravedad. ¿Las gotas están uniformemente separadas?
+    </div>
 
     <script>
         const canvas = document.getElementById('canvas');
@@ -87,8 +92,8 @@
         let showTime = true;
         const faucetImage = new Image();
         faucetImage.src = 'grifov2.png'; // Icono del grifo
-        let freezeOnFirstDropFlag = false;
         let faucetX = 185; // Posición inicial del grifo en px
+        let currentTime = 0; // Tiempo desde la primera gota en segundos
 
         document.getElementById('intervalSlider').addEventListener('input', (e) => {
             dropInterval = e.target.value;
@@ -100,6 +105,14 @@
             gravity = e.target.value;
             document.getElementById('gravityValue').textContent = gravity;
             resetSimulation();
+        });
+
+        document.getElementById('timeSlider').addEventListener('input', (e) => {
+            if (isPaused) {
+                currentTime = e.target.value;
+                document.getElementById('timeValue').textContent = currentTime;
+                updatePausedAnimation();
+            }
         });
 
         document.getElementById('showTimeCheckbox').addEventListener('change', (e) => {
@@ -120,15 +133,19 @@
             clearInterval(intervalId);
             cancelAnimationFrame(animationId);
             isPaused = false;
-            freezeOnFirstDropFlag = false;
+            drops.length = 0;
+            currentTime = 0;
             intervalId = setInterval(() => {
                 drops.push({
                     x: parseInt(faucetX) + 5, // Ajustar la posición de la gota para que salga del extremo izquierdo del grifo
                     y: faucetHeight,
-                    time: 0,
+                    time: currentTime,
                     velocity: 0
                 });
                 updateDropCounter();
+                currentTime += dropInterval / 1000;
+                document.getElementById('timeSlider').value = currentTime;
+                document.getElementById('timeValue').textContent = currentTime.toFixed(1);
             }, dropInterval);
             update();
         }
@@ -139,7 +156,19 @@
                 clearInterval(intervalId);
                 cancelAnimationFrame(animationId);
             } else {
-                startSimulation();
+                intervalId = setInterval(() => {
+                    drops.push({
+                        x: parseInt(faucetX) + 5, // Ajustar la posición de la gota para que salga del extremo izquierdo del grifo
+                        y: faucetHeight,
+                        time: currentTime,
+                        velocity: 0
+                    });
+                    updateDropCounter();
+                    currentTime += dropInterval / 1000;
+                    document.getElementById('timeSlider').value = currentTime;
+                    document.getElementById('timeValue').textContent = currentTime.toFixed(1);
+                }, dropInterval);
+                update();
             }
         }
 
@@ -147,16 +176,38 @@
             clearInterval(intervalId);
             cancelAnimationFrame(animationId);
             isPaused = true;
-            freezeOnFirstDropFlag = false;
             drops.length = 0;
+            currentTime = 0;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawFaucet();
             drawGround();
             updateDropCounter();
+            document.getElementById('timeSlider').value = 0;
+            document.getElementById('timeValue').textContent = 0;
         }
 
-        function freezeOnFirstDrop() {
-            freezeOnFirstDropFlag = true;
+        function updatePausedAnimation() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawFaucet();
+            drawGround();
+            drops.forEach((drop, index) => {
+                if (drop.time <= currentTime) {
+                    drop.velocity = gravity * (currentTime - drop.time);
+                    drop.y = faucetHeight + 0.5 * gravity * Math.pow(currentTime - drop.time, 2) * pixelsPerMeter;
+                    if (drop.y < canvas.height - 20) {
+                        ctx.beginPath();
+                        ctx.arc(drop.x, drop.y, 3, 0, Math.PI * 2);
+                        ctx.fillStyle = 'blue';
+                        ctx.fill();
+                        if (showTime) {
+                            ctx.font = "12px Arial";
+                            ctx.fillStyle = "black";
+                            ctx.fillText(`${(currentTime - drop.time).toFixed(2)} s`, drop.x + 5, drop.y);
+                        }
+                    }
+                }
+            });
+            drawDropCounter();
         }
 
         function update() {
@@ -181,11 +232,6 @@
                 } else {
                     drops.splice(index, 1); // Remover la gota que ha tocado el suelo
                     updateDropCounter();
-                    if (freezeOnFirstDropFlag) {
-                        isPaused = true;
-                        clearInterval(intervalId);
-                        cancelAnimationFrame(animationId);
-                    }
                 }
             });
             drawDropCounter();
@@ -206,15 +252,6 @@
             ctx.fillStyle = "black";
             ctx.fillText(`${drops.length} gotas`, canvas.width - 100, 30);
         }
-
-        // Mostrar la introducción y ocultarla después de unos segundos
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('introText').style.display = 'none';
-                drawFaucet();
-                drawGround();
-            }, 8000); // Tiempo suficiente para leer la introducción
-        };
 
         // Inicializar la imagen del grifo
         faucetImage.onload = () => {
