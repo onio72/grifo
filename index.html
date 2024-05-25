@@ -16,19 +16,9 @@
         #canvas {
             border: 1px solid black;
             background-color: white;
-            position: relative;
         }
         .controls {
             margin-bottom: 20px;
-        }
-        .counter {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 16px;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 5px;
-            border-radius: 5px;
         }
     </style>
 </head>
@@ -53,8 +43,8 @@
 
         <button onclick="startSimulation()">Iniciar</button>
         <button onclick="pauseSimulation()">Pausa</button>
+        <button onclick="resetSimulation()">Reiniciar</button>
     </div>
-    <div class="counter" id="dropCounter">0 gotas</div>
     <canvas id="canvas" width="400" height="600"></canvas>
 
     <script>
@@ -88,10 +78,11 @@
         function drawFaucet() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const faucetImage = new Image();
-            faucetImage.src = 'https://image.shutterstock.com/image-vector/tap-faucet-icon-vector-illustration-260nw-1686684640.jpg'; // Icono del grifo
+            faucetImage.src = 'file:///mnt/data/A_simple_gray_faucet_icon_on_a_white_background._T.png'; // Icono del grifo
             faucetImage.onload = () => {
                 ctx.drawImage(faucetImage, 185, faucetHeight - 50, 30, 50);
                 drawGround();
+                drawDropCounter();
             };
         }
 
@@ -126,6 +117,15 @@
             }
         }
 
+        function resetSimulation() {
+            clearInterval(intervalId);
+            clearInterval(animationId);
+            isPaused = true;
+            drops.length = 0;
+            drawFaucet();
+            updateDropCounter();
+        }
+
         function update() {
             if (isPaused) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -150,11 +150,21 @@
                     updateDropCounter();
                 }
             });
+            drawDropCounter();
             animationId = requestAnimationFrame(update);
         }
 
         function updateDropCounter() {
-            document.getElementById('dropCounter').textContent = `${drops.length} gotas`;
+            const counter = document.getElementById('dropCounter');
+            if (counter) {
+                counter.textContent = `${drops.length} gotas`;
+            }
+        }
+
+        function drawDropCounter() {
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "black";
+            ctx.fillText(`${drops.length} gotas`, canvas.width - 100, 30);
         }
 
         drawFaucet();
