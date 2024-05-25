@@ -26,7 +26,7 @@
 <body>
     <div class="controls">
         <label for="intervalSlider">Intervalo de Goteo (ms): </label>
-        <input type="range" id="intervalSlider" min="100" max="2000" value="1000">
+        <input type="range" id="intervalSlider" min="100" max="2000" value="1000" step="100">
         <span id="intervalValue">1000</span> ms
 
         <br>
@@ -61,6 +61,8 @@
         const pixelsPerMeter = 100; // Factor de conversión para la simulación
         const drops = [];
         let showTime = true;
+        const faucetImage = new Image();
+        faucetImage.src = 'grifov2.png'; // Icono del grifo
 
         document.getElementById('intervalSlider').addEventListener('input', (e) => {
             dropInterval = e.target.value;
@@ -80,14 +82,7 @@
         });
 
         function drawFaucet() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const faucetImage = new Image();
-            faucetImage.src = 'grifov2.png'; // Icono del grifo
-            faucetImage.onload = () => {
-                ctx.drawImage(faucetImage, 185, faucetHeight - 50, 30, 50);
-                drawGround();
-                drawDropCounter();
-            };
+            ctx.drawImage(faucetImage, 185, faucetHeight - 50, 30, 50);
         }
 
         function drawGround() {
@@ -126,7 +121,9 @@
             cancelAnimationFrame(animationId);
             isPaused = true;
             drops.length = 0;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawFaucet();
+            drawGround();
             updateDropCounter();
         }
 
@@ -171,7 +168,12 @@
             ctx.fillText(`${drops.length} gotas`, canvas.width - 100, 30);
         }
 
-        drawFaucet();
+        // Inicializar la imagen del grifo
+        faucetImage.onload = () => {
+            drawFaucet();
+        };
+
+        drawGround(); // Dibujar el suelo al cargar la página
     </script>
 </body>
 </html>
