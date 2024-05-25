@@ -43,6 +43,7 @@
         <br>
 
         <button onclick="startSimulation()">Iniciar</button>
+        <button onclick="pauseSimulation()">Pausa</button>
     </div>
     <canvas id="canvas" width="400" height="600"></canvas>
 
@@ -51,6 +52,8 @@
         const ctx = canvas.getContext('2d');
 
         let intervalId;
+        let animationId;
+        let isPaused = false;
         let dropInterval = 1000;
         let faucetHeight = 150;
         let gravity = 9.81; // Gravedad en m/s²
@@ -95,6 +98,8 @@
 
         function startSimulation() {
             clearInterval(intervalId);
+            clearInterval(animationId);
+            isPaused = false;
             intervalId = setInterval(() => {
                 drops.push({
                     x: 200,
@@ -103,10 +108,21 @@
                     velocity: 0
                 });
             }, dropInterval);
-            requestAnimationFrame(update);
+            update();
+        }
+
+        function pauseSimulation() {
+            isPaused = !isPaused;
+            if (isPaused) {
+                clearInterval(intervalId);
+                clearInterval(animationId);
+            } else {
+                startSimulation();
+            }
         }
 
         function update() {
+            if (isPaused) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawFaucet();
             drawGround();
@@ -126,7 +142,7 @@
                     drops.splice(index, 1); // Remover la gota que ha tocado el suelo
                 }
             });
-            requestAnimationFrame(update);
+            animationId = requestAnimationFrame(update);
         }
 
         drawFaucet();
