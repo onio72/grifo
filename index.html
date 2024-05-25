@@ -162,7 +162,15 @@
         }
 
         function freezeOnFirstDrop() {
-            freezeOnFirstDropFlag = true
+            freezeOnFirstDropFlag = true;
+        }
+
+        function update() {
+            if (isPaused) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawFaucet();
+            drawGround();
+            drops.forEach((drop, index) => {
                 drop.time += 0.016; // Incrementa el tiempo (aprox. 60 FPS)
                 drop.velocity = gravity * drop.time; // La velocidad aumenta linealmente con el tiempo
                 drop.y += drop.velocity * 0.016 * pixelsPerMeter; // La distancia recorrida aumenta cuadráticamente con el tiempo
