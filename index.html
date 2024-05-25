@@ -28,10 +28,15 @@
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 20px;
             border-radius: 10px;
             font-size: 18px;
+            width: 400px; /* Igual al ancho del canvas */
+            height: 600px; /* Igual a la altura del canvas */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -159,7 +164,7 @@
                 drop.time += 0.016; // Incrementa el tiempo (aprox. 60 FPS)
                 drop.velocity = gravity * drop.time; // La velocidad aumenta linealmente con el tiempo
                 drop.y += drop.velocity * 0.016 * pixelsPerMeter; // La distancia recorrida aumenta cuadráticamente con el tiempo
-                if (drop.y < canvas.height - 20) { // Detén la caída en el "suelo"
+                if (drop.y < canvas.height - 20 - 5) { // Detener un poco antes de tocar el suelo
                     ctx.beginPath();
                     ctx.arc(drop.x, drop.y, 3, 0, Math.PI * 2);
                     ctx.fillStyle = 'blue';
