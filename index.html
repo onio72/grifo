@@ -32,9 +32,18 @@
             width: 400px; /* Igual al ancho del canvas */
             margin-bottom: 20px;
         }
+        h1 {
+            margin: 20px 0 10px;
+        }
+        h2 {
+            margin: 10px 0 20px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
+    <h1>Grifo que gotea</h1>
+    <h2>Animación creada por Antonio González</h2>
     <div id="introText">
         Ahora vas a ver una animación de un grifo que gotea. Puedes modificar el lapso de tiempo de separación entre las gotas y la aceleración de la gravedad. ¿Las gotas están uniformemente separadas?
     </div>
@@ -45,15 +54,9 @@
 
         <br>
 
-        <label for="gravitySlider">Aceleración de la Gravedad (m/s²): </label>
+        <label for="gravitySlider">Aceleración de la gravedad (m/s²): </label>
         <input type="range" id="gravitySlider" min="1" max="4" value="2" step="1">
         <span id="gravityValue">2</span> m/s²
-
-        <br>
-
-        <label for="horizontalSlider">Posición horizontal del grifo: </label>
-        <input type="range" id="horizontalSlider" min="0" max="370" value="185" step="1">
-        <span id="horizontalValue">185</span> px
 
         <br>
 
@@ -96,12 +99,6 @@
         document.getElementById('gravitySlider').addEventListener('input', (e) => {
             gravity = e.target.value;
             document.getElementById('gravityValue').textContent = gravity;
-            resetSimulation();
-        });
-
-        document.getElementById('horizontalSlider').addEventListener('input', (e) => {
-            faucetX = e.target.value;
-            document.getElementById('horizontalValue').textContent = faucetX;
             resetSimulation();
         });
 
