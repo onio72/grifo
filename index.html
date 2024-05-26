@@ -9,7 +9,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             background-color: #f0f0f0;
             margin: 0;
             padding: 20px;
@@ -24,32 +23,31 @@
             margin-bottom: 20px;
             text-align: center;
         }
-        #introText {
-            text-align: center;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 14px; /* Letra más pequeña */
-            width: 400px; /* Igual al ancho del canvas */
-            margin-top: 20px;
-        }
-        h1 {
-            margin: 20px 0 10px;
-        }
-        .footer {
-            margin-top: 20px;
-            font-size: 14px;
-        }
         .questions {
             margin-top: 20px;
         }
         .question {
             margin-bottom: 10px;
         }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        .feedback {
+            margin-top: 20px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <h1>Grifo que gotea</h1>
+    <p>Puedes modificar el lapso de tiempo de separación entre las gotas y la aceleración de la gravedad. Tras experimentar con la animación responde a las preguntas de abajo.</p>
     <div class="controls">
         <label for="intervalSlider">Intervalo de goteo (ms): </label>
         <input type="range" id="intervalSlider" min="100" max="2000" value="1000" step="100">
@@ -74,27 +72,41 @@
         <button onclick="freezeOnFirstDrop()">Congelar</button>
     </div>
     <canvas id="canvas" width="400" height="600"></canvas>
-    <div id="introText">
-        Puedes modificar el lapso de tiempo de separación entre las gotas y la aceleración de la gravedad. ¿Las gotas están uniformemente separadas?
-    </div>
-    <div class="footer">
-        Animación creada por Antonio González
-    </div>
 
     <div class="questions">
         <div class="question">
-            <p>Pregunta 1: ¿Qué variable controla la aceleración de la caída de las gotas?</p>
-            <input type="radio" name="question1" value="interval"> Intervalo de goteo<br>
-            <input type="radio" name="question1" value="gravity"> Aceleración de la gravedad<br>
-            <input type="radio" name="question1" value="height"> Altura del grifo<br>
+            <p>Pregunta 1: ¿Qué tipo de movimiento describen las gotas al caer?</p>
+            <div id="question1-options"></div>
         </div>
         <div class="question">
-            <p>Pregunta 2: ¿Qué sucede al aumentar el intervalo de goteo?</p>
-            <input type="radio" name="question2" value="more"> Más gotas caen<br>
-            <input type="radio" name="question2" value="less"> Menos gotas caen<br>
-            <input type="radio" name="question2" value="same"> El número de gotas no cambia<br>
+            <p>Pregunta 2: ¿Qué ocurre con el tiempo que tarda en llegar al suelo una gota al aumentar la aceleración de la gravedad?</p>
+            <input type="radio" name="question2" value="disminuye"> Disminuye<br>
+            <input type="radio" name="question2" value="aumenta"> Aumenta<br>
+            <input type="radio" name="question2" value="igual"> Se mantiene igual<br>
+        </div>
+        <div class="question">
+            <p>Pregunta 3: ¿Qué ocurre si aumentas el intervalo de goteo?</p>
+            <input type="radio" name="question3" value="more"> Más gotas caen<br>
+            <input type="radio" name="question3" value="less"> Menos gotas caen<br>
+            <input type="radio" name="question3" value="same"> El número de gotas no cambia<br>
+        </div>
+        <div class="question">
+            <p>Pregunta 4: Las gotas caen regularmente cada cierto intervalo de tiempo.</p>
+            <input type="radio" name="question4" value="true"> Verdadero<br>
+            <input type="radio" name="question4" value="false"> Falso<br>
+        </div>
+        <div class="question">
+            <p>Pregunta 5: La distancia entre gotas es...</p>
+            <input type="radio" name="question5" value="same"> siempre la misma<br>
+            <input type="radio" name="question5" value="increase"> aumenta a medida que caen las gotas porque cada vez van más rápido<br>
+            <input type="radio" name="question5" value="decrease"> disminuye a medida que caen las gotas<br>
         </div>
         <button onclick="checkAnswers()">Enviar respuestas</button>
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <div class="footer">
+        Animación creada por Antonio González
     </div>
 
     <script>
@@ -240,17 +252,45 @@
         drawGround(); // Dibujar el suelo al cargar la página
 
         function checkAnswers() {
-            const question1 = document.querySelector('input[name="question1"]:checked');
-            const question2 = document.querySelector('input[name="question2"]:checked');
+            const answers = {
+                question1: "MRUA",
+                question2: "disminuye",
+                question3: "less",
+                question4: "true",
+                question5: "increase"
+            };
             let score = 0;
-            if (question1 && question1.value === "gravity") {
-                score++;
-            }
-            if (question2 && question2.value === "less") {
-                score++;
-            }
-            alert(`Has respondido correctamente ${score} de 2 preguntas.`);
+            Object.keys(answers).forEach(q => {
+                const selected = document.querySelector(`input[name="${q}"]:checked`);
+                if (selected) {
+                    if (selected.value === answers[q]) {
+                        score++;
+                        selected.parentNode.classList.add('correct');
+                    } else {
+                        selected.parentNode.classList.add('incorrect');
+                    }
+                }
+            });
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = `Has respondido correctamente ${score} de 5 preguntas.`;
         }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        window.onload = () => {
+            const question1Options = [
+                '<input type="radio" name="question1" value="MRU"> MRU<br>',
+                '<input type="radio" name="question1" value="MRUA"> MRUA<br>',
+                '<input type="radio" name="question1" value="MCUA"> MCUA<br>'
+            ];
+            shuffle(question1Options);
+            document.getElementById('question1-options').innerHTML = question1Options.join('');
+        };
     </script>
 </body>
 </html>
