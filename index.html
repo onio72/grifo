@@ -10,14 +10,15 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
             background-color: #f0f0f0;
             margin: 0;
+            padding: 20px;
         }
         #canvas {
             border: 1px solid black;
             background-color: white;
             position: relative;
+            margin-bottom: 20px;
         }
         .controls {
             margin-bottom: 20px;
@@ -35,13 +36,15 @@
         h1 {
             margin: 20px 0 10px;
         }
-        h2 {
-            margin: 10px 0 20px;
-            font-size: 16px;
-        }
         .footer {
             margin-top: 20px;
             font-size: 14px;
+        }
+        .questions {
+            margin-top: 20px;
+        }
+        .question {
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -76,6 +79,22 @@
     </div>
     <div class="footer">
         Animación creada por Antonio González
+    </div>
+
+    <div class="questions">
+        <div class="question">
+            <p>Pregunta 1: ¿Qué variable controla la aceleración de la caída de las gotas?</p>
+            <input type="radio" name="question1" value="interval"> Intervalo de goteo<br>
+            <input type="radio" name="question1" value="gravity"> Aceleración de la gravedad<br>
+            <input type="radio" name="question1" value="height"> Altura del grifo<br>
+        </div>
+        <div class="question">
+            <p>Pregunta 2: ¿Qué sucede al aumentar el intervalo de goteo?</p>
+            <input type="radio" name="question2" value="more"> Más gotas caen<br>
+            <input type="radio" name="question2" value="less"> Menos gotas caen<br>
+            <input type="radio" name="question2" value="same"> El número de gotas no cambia<br>
+        </div>
+        <button onclick="checkAnswers()">Enviar respuestas</button>
     </div>
 
     <script>
@@ -184,12 +203,12 @@
                         ctx.fillStyle = "black";
                         ctx.fillText(`${drop.time.toFixed(2)} s`, drop.x + 5, drop.y);
                     }
-                } else if (drop.y >= canvas.height - 30 && freezeOnFirstDropFlag) {
+                } else if (drop.y >= canvas.height - 30 && drop.y < canvas.height - 20 && freezeOnFirstDropFlag) {
                     isPaused = true;
                     clearInterval(intervalId);
                     cancelAnimationFrame(animationId);
                     freezeOnFirstDropFlag = false; // Reiniciar la bandera después de pausar
-                } else {
+                } else if (drop.y >= canvas.height - 20) {
                     drops.splice(index, 1); // Remover la gota que ha tocado el suelo
                     updateDropCounter();
                 }
@@ -219,6 +238,19 @@
         };
 
         drawGround(); // Dibujar el suelo al cargar la página
+
+        function checkAnswers() {
+            const question1 = document.querySelector('input[name="question1"]:checked');
+            const question2 = document.querySelector('input[name="question2"]:checked');
+            let score = 0;
+            if (question1 && question1.value === "gravity") {
+                score++;
+            }
+            if (question2 && question2.value === "less") {
+                score++;
+            }
+            alert(`Has respondido correctamente ${score} de 2 preguntas.`);
+        }
     </script>
 </body>
 </html>
