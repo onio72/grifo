@@ -184,16 +184,14 @@
                         ctx.fillStyle = "black";
                         ctx.fillText(`${drop.time.toFixed(2)} s`, drop.x + 5, drop.y);
                     }
+                } else if (drop.y >= canvas.height - 30 && freezeOnFirstDropFlag) {
+                    isPaused = true;
+                    clearInterval(intervalId);
+                    cancelAnimationFrame(animationId);
+                    freezeOnFirstDropFlag = false; // Reiniciar la bandera después de pausar
                 } else {
-                    if (freezeOnFirstDropFlag) {
-                        isPaused = true;
-                        clearInterval(intervalId);
-                        cancelAnimationFrame(animationId);
-                        freezeOnFirstDropFlag = false; // Reiniciar la bandera después de pausar
-                    } else {
-                        drops.splice(index, 1); // Remover la gota que ha tocado el suelo
-                        updateDropCounter();
-                    }
+                    drops.splice(index, 1); // Remover la gota que ha tocado el suelo
+                    updateDropCounter();
                 }
             });
             drawDropCounter();
